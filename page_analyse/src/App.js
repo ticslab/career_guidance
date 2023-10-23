@@ -71,11 +71,12 @@ const App = () => {
 							return acc;
 			  		}, {});
 					var g = Object.entries(res);
-					g.sort((a, b) => a[1] < b[1] ? 1 : -1)
+					g.sort((a, b) => a[1] < b[1] ? 1 : -1);
 					setGroups(g);
 					create_max_data(g.slice(0, 3));
-					g.push(['sex', sex])
-					sendAct(g);
+					var send_groups = g.slice(0);
+					send_groups.push(['sex', sex]);
+					sendAct(send_groups);
 					fetchData();
 						
 				}, 
