@@ -37,11 +37,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 def get_act():
     act_list.list_of_act = json.loads(request.data)
     print(f'post - {act_list.list_of_act}')
-    return "Thanks"
-
-
-@app.route('/type', methods=['GET'])
-def main():
     model = joblib.load('model_boosting.pkl')
     columns = pd.read_csv('columns.csv')
     act_dict = dict(act_list.list_of_act)

@@ -8,23 +8,6 @@ import Investigative from '../img/Investigative.png';
 import Realistic from '../img/Realistic.png';
 import Social from '../img/Social.png';
 
-function selectImage(type){
-	switch (type){
-		case 'Реалистичный': 
-			return Realistic;
-		case 'Интеллектуальный': 
-			return Investigative;
-		case 'Артистический':
-			return Artistic;
-		case 'Социальный':
-			return Social;
-		case 'Предприимчивый':
-			return Enterprising;
-		case 'Конвенциональный':
-			return Conventional;
-	}
-}
-
 
 import { Panel, PanelHeader, Group, InfoRow, PanelHeaderBack, SimpleCell, Cell, Avatar, Button, Spinner, Image } from '@vkontakte/vkui';
 
@@ -39,8 +22,27 @@ function viewAct(){
 	document.getElementById("button").style.display = "none";
   };
 
-const Page = props => (
-	<Panel id={props.id}>
+const Page = (props) => {
+
+	function selectImage(type){
+		switch (type){
+			case 'Реалистичный': 
+				return Realistic;
+			case 'Интеллектуальный': 
+				return Investigative;
+			case 'Артистический':
+				return Artistic;
+			case 'Социальный':
+				return Social;
+			case 'Предприимчивый':
+				return Enterprising;
+			case 'Конвенциональный':
+				return Conventional;
+		}
+	}
+
+	return(
+		<Panel id={props.id}>
 		<div
 		aria-busy={true}
 		aria-live="polite">
@@ -62,9 +64,9 @@ const Page = props => (
 		</Group>}
 		{ !props.fId && 
 		<Group>
-			{ props.loading ? 
-		<Spinner size="medium" style={{ margin: '20px 0' }}>
-		</Spinner> : 
+		{ props.loading && 
+		<Spinner size="medium" style={{ margin: '20px 0' }}/>}
+		{!props.loading&&props.type&&selectImage(props.type['type'])&&
 		<Group>
 		<div style={{justifyContent: 'center', display: 'flex', alignItems: 'center', fontSize: 25}}>
 			<img src={selectImage(props.type['type'])} style={{flexDirection: 'column', margin: '0 5px', display: 'block', alignItems: 'center', width: '65px'}}></img>
@@ -73,8 +75,8 @@ const Page = props => (
 			</div>
 		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', fontSize: 20, color: '#2F71F1', fontWeight: 600, textAlign: 'center', whiteSpace: 'normal'}}>Вероятно Вы относитесь к {props.type['type'].slice(0, -2).toLowerCase()}ому <br/>типу личности</div>
 		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', fontSize: 15, margin: '10px 50px', textAlign: 'center'}}>{di[props.type['type']]}</div>
-		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', margin: '10px 0'}}><Button style={
-				{backgroundColor: '#2688EB', height: '35px'}} size='m' onClick={() => location.href='https://vk.com/ticspsytests'}>Уточнить результаты</Button></div>
+		{/* <div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', margin: '10px 0'}}><Button style={
+				{backgroundColor: '#2688EB', height: '35px'}} size='m' onClick={() => location.href='https://vk.com/ticspsytests'}>Уточнить результаты</Button></div> */}
 		</Group>
 		}
 
@@ -89,12 +91,14 @@ const Page = props => (
 		}
 		<Group id='group' style={{display: 'none'}}>
 			<SimpleCell>
-                {props.groups.map(group => <InfoRow header={group[0]}>{group[1]}</InfoRow>)}
+                {props.groups.map(group => <InfoRow header={group[0]}>{group[1]} </InfoRow>)}
 			</SimpleCell>
 		</Group>
 		
 	</Panel>
-);
+	);
+};
+
 // && !props.fetchedUser.is_closed
 
 
