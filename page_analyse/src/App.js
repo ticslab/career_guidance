@@ -21,6 +21,9 @@ const App = () => {
 	const [predictedType, setType] = useState(Object());
 	const [loading, setLoading] = useState(true);
 	const [intObject, setIntObject] = useState([]);
+	const [chartData, setChartData] = useState([]);
+	const [labels, setLabels] = useState([]);
+	const [names, setNames] = useState([]);
 
 
 
@@ -143,45 +146,39 @@ const App = () => {
 	  }
 
 	function intersectForPicture(my, result, all_g, all_act){
-		console.log(1, my);
-		console.log(2, result);
-		console.log(3, all_g);
-		console.log(4, all_act);
 		var data = [];
-		var activities = [];
 		var randoms = [];
-		// for (let i=0; i < 4; i++){
-		// 	var line = [];
-		// 	var rnd = getRandomInt(all_act.length);
-		// 	activities.push(all_act[rnd]);
-		// 	line.push(my[all_act[rnd]]);
-		// 	for (var id in all_g){
-		// 		line.push(all_g[id][all_act[rnd]] ? all_g[id][all_act[rnd]] : 0);
-		// 	}
-		// 	data.push(line);
-		// 	all_act.splice(rnd, 1);
-		// }\
-		console.log(all_g.length+1);
+		var rnd = 0;
 		for (let j=0;j<4;j++){
-			var rnd = getRandomInt(all_act.length);
+			rnd = getRandomInt(4);
 			randoms.push(all_act[rnd]);
 			all_act.splice(rnd, 1);
-		}
-		console.log(randoms);
-		for (let i=0;i<all_g.length+1;i++){
+		};
+		var keys = Object.keys(all_g);
+		var names = [];
+		for (var key in keys){
+			for (let t=0; t < result[result.length-1].length;t++){
+				if (keys[key] == result[result.length-1][t].id.toString()){
+					names.push(result[result.length-1][t].first_name + ' ' + result[result.length-1][t].last_name)
+				};
+			};
+		};
+		setNames(names);
+		for (let i=0;i<randoms.length;i++){
 			var line = [];
-			for (var act in randoms){
+			for (let j=0;j< randoms.length; j++){
 				if (i == 0){
-					line.push(me[act]);
+					line.push(my[randoms[j]]);
 				}
 				else{
-					line.push(all_g[i-1][act]);
+					line.push(all_g[keys[i-1]][randoms[j]] ? all_g[keys[i-1]][randoms[j]] : 0);
+
 				}
 			}
 			data.push(line);
-		}
-		console.log(5, data);
-		console.log(6, randoms);
+		};
+		setChartData(data);
+		setLabels(randoms);
 	}
 
 	async function getIntersection(user_list){
@@ -347,7 +344,7 @@ const App = () => {
 								<Home id='home' fetch_foreign={fetchForeignPage} fetch_my={fetchMyPage} get={getUserId} go={go} flag={boolText} fetch_int={fetchIntersection} onChange={handleChange} getInt={getIntersection} user={fetchedUser} />
 								<Page id='page' groups={groups} go={go} fetchedUser={fetchedUser} max_data={maxData} type={predictedType} loading={loading} fId={Boolean(fetchedId)}/>
 								<Info id='info' go={go}/>
-								<IntersectionPage id='intpage' go={go} intObject={intObject} loading={loading}/>
+								<IntersectionPage id='intpage' go={go} intObject={intObject} loading={loading} chartData={chartData} labels={labels} names={names}/>
 							</View>
 						</SplitCol>
 					</SplitLayout>

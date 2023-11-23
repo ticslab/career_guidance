@@ -1,7 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import LineChart  from './LineChart';
 
-import { PanelHeader, Panel, PanelHeaderBack, Div,InfoRow, Link, Group, SimpleCell, Button, Avatar, Spinner } from '@vkontakte/vkui';
+
+import { PanelHeader, Panel, PanelHeaderBack, Div,InfoRow, Cell, Group, SimpleCell, Button, Avatar, Spinner } from '@vkontakte/vkui';
+
+function viewAct(){
+	document.getElementById("group").style.display = "block";
+	document.getElementById("button").style.display = "none";
+  };
 
 const IntersectionPage = (props) => {
 
@@ -12,17 +19,27 @@ const IntersectionPage = (props) => {
             >
                 Тематики друзей
             </PanelHeader>
-                <Group>
                     {props.loading && <Spinner size="medium" style={{ margin: '20px 0' }}/>}
                     {!props.loading && 
-                        <Div style={{fontSize: '15px', fontWeight: '600', marginBottom: '-20px'}}>
+                    <Group>
+                        <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
+                            <LineChart chartData={props.chartData} chartLabels={props.labels} names={props.names}/>
+
+                        </Div>
+                        <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
+                        <Button id='button' style={{backgroundColor: 'rgba(0,0,0,0)', color: '#818C99', fontSize: 16}} onClick={viewAct}>
+			                Показать список всех друзей
+		                </Button>
+                        </Div>
+                        <Div id='group' style={{fontSize: '15px', fontWeight: '600', marginBottom: '-20px', display: 'none'}}>
                             <Div>
                                 {props.intObject}
                             </Div>
-                        </Div>
+                        </Div>    
+                    </Group>
+                                            
                     }
                     
-                </Group>
             
             
         </Panel>
