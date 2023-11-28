@@ -59,7 +59,7 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 		<ModalRoot activeModal={activeModal} onClose={() => setActiveModal(null)}>
 				<ModalPage id="modal">
 					<ModalPageHeader 
-					after={<PanelHeaderSubmit onClick={() => {handleChange(selectedCheckboxes);go('intpage');} } data-to={'intpage'} />}
+					after={<PanelHeaderSubmit onClick={() => {handleChange(selectedCheckboxes);if(selectedCheckboxes.length>1){go('intpage');}} } data-to={'intpage'} />}
 					>
 						Друзья
 					</ModalPageHeader>

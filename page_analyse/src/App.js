@@ -26,7 +26,6 @@ const App = () => {
 	const [names, setNames] = useState([]);
 
 
-
 	async function handleChange(value){
 		if (!loading){
 			setLoading(true);
@@ -59,7 +58,7 @@ const App = () => {
 			scope: 'friends'
 			});
 		var data = '';
-		data = await bridge.send("VKWebAppCallAPIMethod", {"method": "friends.get", "request_id": "getFriends", "params": {"user_id": id, "v":"5.131","fields": "photo_100", "access_token": token.access_token}});
+		data = await bridge.send("VKWebAppCallAPIMethod", {"method": "friends.get", "request_id": "getFriends",  "params": {"user_id": id, "v":"5.131","fields": "photo_100", "access_token": token.access_token}});
 		return data.response.items;
 	}
 
@@ -149,40 +148,63 @@ const App = () => {
 		var data = [];
 		var randoms = [];
 		var rnd = 0;
-		for (let j=0;j<4;j++){
-			rnd = getRandomInt(4);
-			randoms.push(all_act[rnd]);
-			all_act.splice(rnd, 1);
-		};
-		var keys = Object.keys(all_g);
-		var names = [];
-		for (var key in keys){
-			for (let t=0; t < result[result.length-1].length;t++){
-				if (keys[key] == result[result.length-1][t].id.toString()){
-					names.push(result[result.length-1][t].first_name + ' ' + result[result.length-1][t].last_name)
+		try{
+			for (let j=0;j<4;j++){
+				rnd = getRandomInt(4);
+				randoms.push(all_act[rnd]);
+				all_act.splice(rnd, 1);
+			};
+			var keys = Object.keys(all_g);
+			var names = [];
+			for (var key in keys){
+				for (let t=0; t < result[result.length-1].length;t++){
+					if (keys[key] == result[result.length-1][t].id.toString()){
+						names.push(result[result.length-1][t].first_name + ' ' + result[result.length-1][t].last_name)
+					};
 				};
 			};
-		};
-		setNames(names);
-		for (let i=0;i<randoms.length;i++){
-			var line = [];
-			for (let j=0;j< randoms.length; j++){
+			setNames(names);
+			for (let i=0;i<randoms.length;i++){
+				var line = [];
+				for (let j=0;j< randoms.length; j++){
+					if (i == 0){
+						line.push(my[randoms[j]]);
+					}
+					else{
+						line.push(all_g[keys[i-1]][randoms[j]] ? all_g[keys[i-1]][randoms[j]] : 0);
+	
+					}
+				}
+				var sum_of_others = 0;
 				if (i == 0){
-					line.push(my[randoms[j]]);
+					for (let key in my){
+						if (!randoms.includes(key)){
+							sum_of_others += my[key]
+						}
+					}
 				}
 				else{
-					line.push(all_g[keys[i-1]][randoms[j]] ? all_g[keys[i-1]][randoms[j]] : 0);
-
+					for (let key in all_g[keys[i-1]]){
+						if (!randoms.includes(key)){
+							sum_of_others += all_g[keys[i-1]][key]
+						}
+					}
 				}
-			}
-			data.push(line);
-		};
-		setChartData(data);
-		setLabels(randoms);
+				// line.push(sum_of_others);
+				data.push(line);
+			};
+			// randoms.push('Остальное');
+			setChartData(data);
+			setLabels(randoms);
+		}
+		catch{
+			setChartData([]);
+			setLabels([]);
+		}
+		
 	}
 
 	async function getIntersection(user_list){
-		console.log(12345, user_list);
 		try{
 			if (user_list.includes(null)){
 				user_list[0] = fetchedUser.id;

@@ -22,16 +22,18 @@ const IntersectionPage = (props) => {
                     {props.loading && <Spinner size="medium" style={{ margin: '20px 0' }}/>}
                     {!props.loading && 
                     <Group>
-                        <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
-                            <LineChart chartData={props.chartData} chartLabels={props.labels} names={props.names}/>
-
+                        {props.chartData.length >= 3 &&
+                            <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
+                                <LineChart chartData={props.chartData} chartLabels={props.labels} names={props.names}/>
+                            </Div>
+                        }
+                        
+                        <Div style={{flexDirection: 'column', display: props.chartData.length >=3 ? 'flex' : 'none', alignItems: 'center'}}>
+                            <Button id='button' style={{backgroundColor: 'rgba(0,0,0,0)', color: '#818C99', fontSize: 16}} onClick={viewAct}>
+                                Показать список всех друзей
+                            </Button>
                         </Div>
-                        <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
-                        <Button id='button' style={{backgroundColor: 'rgba(0,0,0,0)', color: '#818C99', fontSize: 16}} onClick={viewAct}>
-			                Показать список всех друзей
-		                </Button>
-                        </Div>
-                        <Div id='group' style={{fontSize: '15px', fontWeight: '600', marginBottom: '-20px', display: 'none'}}>
+                        <Div id='group' style={{fontSize: '15px', fontWeight: '600', marginBottom: '-20px', display: props.chartData.length >=3 ? 'none' : 'block' }}>
                             <Div>
                                 {props.intObject}
                             </Div>
