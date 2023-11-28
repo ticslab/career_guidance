@@ -9,7 +9,7 @@ import Realistic from '../img/Realistic.png';
 import Social from '../img/Social.png';
 
 
-import { Panel, PanelHeader, Group, InfoRow, PanelHeaderBack, SimpleCell, Cell, Avatar, Button, Spinner, Image } from '@vkontakte/vkui';
+import { Panel, PanelHeader, Group, InfoRow, PanelHeaderBack, SimpleCell, Cell, Avatar, Button, Spinner } from '@vkontakte/vkui';
 
 var di = {'Реалистичный': 'Вы — человек действия, результат Вашего труда осязаем и предметен. Вы охотнее делаете, чем говорите, настойчивы и уверены в себе, отличаетесь эмоциональной стабильностью и надежностью. Подходящие профессии:  механик, электрик, инженер, моряк, водитель, повар, пожарный, техник, ювелир, фермер и др.', 
 		  "Интеллектуальный": "Вы склонны к профессиям умственного труда, позволяющим проявлять свойственные Вам любопытство, креативность, а также аналитичность мышления. Подходящие профессии: научный работник, философ, физик, математик, инженер и др.к", 
@@ -98,8 +98,6 @@ const Page = (props) => {
 	</Panel>
 	);
 };
-
-// && !props.fetchedUser.is_closed
 
 
 Page.propTypes = {

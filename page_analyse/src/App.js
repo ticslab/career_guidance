@@ -91,7 +91,6 @@ const App = () => {
 						var send_groups = g.slice(0);
 						send_groups.push(['sex', sex]);
 						await sendAct(flag, send_groups);
-						// fetchData();
 					}			
 					else{
 						return res;
@@ -206,7 +205,7 @@ const App = () => {
 
 	async function getIntersection(user_list){
 		try{
-			if (user_list.includes(null)){
+			if (user_list.includes(null) || user_list[0] != fetchedUser.id){
 				user_list[0] = fetchedUser.id;
 			}
 		}
@@ -248,7 +247,6 @@ const App = () => {
 			result.push(Object.entries(intersection));
 		}
 		result.push(data[0][1]);
-		console.log(result);
 		intersectForPicture(my_act, result, all_g, all_activities_in_intersection);
 		return result;
 	};
@@ -333,7 +331,6 @@ const App = () => {
 
     async function prepare(res){
         var lines = [];
-		console.log(res);
         if (res){
             for (let i=0;i<res.length-1;i++){
                 lines.push(

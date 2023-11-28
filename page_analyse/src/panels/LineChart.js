@@ -24,25 +24,10 @@ ChartJS.register(
   Legend
 );
 
-// export const options = {
-//   responsive: true,
-//   plugins: {
-//     legend: {
-//       position: 'top' as const,
-//     },
-//     title: {
-//       display: true,
-//       text: 'Chart.js Line Chart',
-//     },
-//   },
-// };
-
-
 
 export const LineChart = ({chartData, chartLabels, names}) => {
     const labels = chartLabels;
     const data = {
-        // chartLabels,
         labels,
         datasets: [
             {

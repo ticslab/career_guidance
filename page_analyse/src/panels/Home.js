@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { PanelHeader, Panel, Button, Div, Checkbox,Cell, Group, FormItem, Input, FormLayoutGroup,ModalPage, PanelHeaderSubmit, ModalPageHeader,SplitLayout, Avatar, Search, ModalRoot  } from '@vkontakte/vkui';
+import { PanelHeader, Panel, Button, Div, Checkbox, FormItem, Input, FormLayoutGroup,ModalPage, PanelHeaderSubmit, ModalPageHeader,SplitLayout, Avatar, Search, ModalRoot  } from '@vkontakte/vkui';
 
 import icon from '../img/icon.png';
 import './Icon.css';

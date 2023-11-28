@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import LineChart  from './LineChart';
 
 
-import { PanelHeader, Panel, PanelHeaderBack, Div,InfoRow, Cell, Group, SimpleCell, Button, Avatar, Spinner } from '@vkontakte/vkui';
+import { PanelHeader, Panel, PanelHeaderBack, Div, Group, Button, Spinner } from '@vkontakte/vkui';
 
 function viewAct(){
 	document.getElementById("group").style.display = "block";
