@@ -360,7 +360,7 @@ const App = () => {
 					<SplitLayout>
 						<SplitCol>
 							<View activePanel={activePanel}>
-								<Home id='home' fetch_foreign={fetchForeignPage} fetch_my={fetchMyPage} get={getUserId} go={go} flag={boolText} fetch_int={fetchIntersection} onChange={handleChange} getInt={getIntersection} user={fetchedUser} />
+								<Home id='home' fetch_foreign={fetchForeignPage} fetch_my={fetchMyPage} get={getUserId} go={go} flag={boolText} fetch_int={fetchIntersection} onChange={handleChange} user={fetchedUser} />
 								<Page id='page' groups={groups} go={go} fetchedUser={fetchedUser} max_data={maxData} type={predictedType} loading={loading} fId={Boolean(fetchedId)}/>
 								<Info id='info' go={go}/>
 								<IntersectionPage id='intpage' go={go} intObject={intObject} loading={loading} chartData={chartData} labels={labels} names={names}/>

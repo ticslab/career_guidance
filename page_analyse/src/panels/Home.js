@@ -6,7 +6,7 @@ import { PanelHeader, Panel, Button, Div, Checkbox, FormItem, Input, FormLayoutG
 import icon from '../img/icon.png';
 import './Icon.css';
 
-const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange, user, getInt }) => {
+const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange, user }) => {
 	const [activeModal, setActiveModal] = React.useState(null);
 	const [friends, setFriends] = React.useState(null);
 	const [search, setSearch] = React.useState('');
@@ -24,8 +24,6 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 	const handleCheckboxChange = (event) => {
 		var name = event.target.id;
 		var checked = event.target.checked; 
-		console.log(name);
-		console.log(checked);
 		var updatedSelectedCheckboxes = [...selectedCheckboxes];
 		
 		if (checked) {
@@ -85,6 +83,17 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 						
 						)}
 				</ModalPage>
+				<ModalPage id='hint'>
+					<ModalPageHeader 
+					after={<PanelHeaderSubmit onClick={() => setActiveModal('modal')}/>}
+					>
+						Инструкция
+					</ModalPageHeader>
+					<Div>
+						Вам будет предложено выбрать друзей из приведенного списка.<br/><br/>Для удобства можно воспользоваться строкой для поиска.<br/><br/>
+						После нажатия на кнопку в правом верхнем углу, приложение рассчитает пересечение Ваших тематик с тематиками выбранных друзей.
+					</Div>
+				</ModalPage>
 		</ModalRoot>
 	);
 
@@ -132,7 +141,7 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 					
 					<Button style={
 						{backgroundColor: '#2688EB', //onClick
-						height: '35px'}} size='m' onClick={() => {getFrineds();setActiveModal('modal');}}>
+						height: '35px'}} size='m' onClick={() => {getFrineds();setActiveModal('hint');}}>
 						Анализ общих тематик
 					</Button>
 					
