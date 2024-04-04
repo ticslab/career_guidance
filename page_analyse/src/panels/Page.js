@@ -7,9 +7,12 @@ import Enterprising from '../img/Enterprising.png';
 import Investigative from '../img/Investigative.png';
 import Realistic from '../img/Realistic.png';
 import Social from '../img/Social.png';
+import bridge from '@vkontakte/vk-bridge';
+import { Icon20InfoCircleOutline } from '@vkontakte/icons';
 
+import { Panel, PanelHeader, Group, InfoRow, PanelHeaderBack, SimpleCell, Cell, Avatar, Button, Spinner, Div, Text } from '@vkontakte/vkui';
+import { unstable_Popover as Popover } from '@vkontakte/vkui';
 
-import { Panel, PanelHeader, Group, InfoRow, PanelHeaderBack, SimpleCell, Cell, Avatar, Button, Spinner } from '@vkontakte/vkui';
 
 var di = {'Реалистичный': 'Вы — человек действия, результат Вашего труда осязаем и предметен. Вы охотнее делаете, чем говорите, настойчивы и уверены в себе, отличаетесь эмоциональной стабильностью и надежностью. Подходящие профессии:  механик, электрик, инженер, моряк, водитель, повар, пожарный, техник, ювелир, фермер и др.', 
 		  "Интеллектуальный": "Вы склонны к профессиям умственного труда, позволяющим проявлять свойственные Вам любопытство, креативность, а также аналитичность мышления. Подходящие профессии: научный работник, философ, физик, математик, инженер и др.к", 
@@ -17,6 +20,12 @@ var di = {'Реалистичный': 'Вы — человек действия,
 		  "Социальный": 'Вы склонны к профессиям, предполагающим социальное взаимодействие, особенно связанное с воспитанием, объяснением, просвещением, помощью другим. Подходящие профессии: врач, учитель, психолог, социальный работник, менеджер по персоналу, организатор мероприятий, представитель службы поддержки клиентов и др.', 
 		  "Предприимчивый": 'Вы предприимчивы, энергичны, инициативны и амбициозны, любите генерировать креативные идеи, стремитесь к достижению вершин. Выбираете цели, ценности и задачи, позволяющие проявить энтузиазм, доминантность, реализовать авантюризм. Подходящие профессии: предприниматель, адвокат, страховой агент, брокер на бирже, агент по недвижимости, политик, пиарщик.', 
 		  "Конвенциональный": 'Вы предпочитаете работать в структурированной среде и имеете талант к организации и администрированию. Ориентированы на работу с информацией, ее систематизацией и управлением. Подходящие профессии: секретарь, бухгалтер, патентовед, нотариус, топограф, корректор, страховой агент, офис-менеджер.'};
+const goToApp = () => {
+	const appId = 7794698; 
+	bridge.send("VKWebAppOpenApp", { "app_id": appId })
+	  .then(data => console.log(data))
+	  .catch(error => console.error(error));
+  }
 function viewAct(){
 	document.getElementById("group").style.display = "block";
 	document.getElementById("button").style.display = "none";
@@ -41,6 +50,11 @@ const Page = (props) => {
 		}
 	}
 
+	function reset(){
+		props.go('home');
+		props.reset();
+	}
+
 	return(
 		<Panel id={props.id}>
 		<div
@@ -48,7 +62,7 @@ const Page = (props) => {
 		aria-live="polite">
 		</div>
 		<PanelHeader
-			before={<PanelHeaderBack onClick={props.go} data-to="home"/>}
+			before={<PanelHeaderBack onClick={reset} data-to="home"/>}
 		>
             Тематики групп и их количество 
 		</PanelHeader>
@@ -72,11 +86,24 @@ const Page = (props) => {
 			<img src={selectImage(props.type['type'])} style={{flexDirection: 'column', margin: '0 5px', display: 'block', alignItems: 'center', width: '65px'}}></img>
 
 			{props.type['type'].toUpperCase()}
+			<Popover
+				action="hover"
+				placement="bottom"
+				aria-describedby="tooltip-1"
+				content={
+					<Div>
+						<Text style={{fontSize: '15px', textAlign: 'center'}}>Это не точный тип.<br/> Для уточнения нажмите<br/> на кнопку<br/> «Уточнить результаты»</Text>
+					</Div>
+				}
+				>
+				<Icon20InfoCircleOutline id={'tooltip-1'}></Icon20InfoCircleOutline>
+			</Popover>
+			
 			</div>
 		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', fontSize: 20, color: '#2F71F1', fontWeight: 600, textAlign: 'center', whiteSpace: 'normal'}}>Вероятно Вы относитесь к {props.type['type'].slice(0, -2).toLowerCase()}ому <br/>типу личности</div>
 		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', fontSize: 15, margin: '10px 50px', textAlign: 'center'}}>{di[props.type['type']]}</div>
-		{/* <div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', margin: '10px 0'}}><Button style={
-				{backgroundColor: '#2688EB', height: '35px'}} size='m' onClick={() => location.href='https://vk.com/ticspsytests'}>Уточнить результаты</Button></div> */}
+		<div style={{flexDirection: 'column', display: 'flex', alignItems: 'center', margin: '10px 0'}}><Button style={
+				{backgroundColor: '#2688EB', height: '35px'}} size='m' onClick={goToApp}>Уточнить результаты</Button></div>
 		</Group>
 		}
 
@@ -115,7 +142,8 @@ Page.propTypes = {
 	max_data: PropTypes.object,
 	type: PropTypes.object,
 	loading: PropTypes.bool, 
-	fId: PropTypes.bool
+	fId: PropTypes.bool,
+	reset: PropTypes.func
 }
 
 export default Page;

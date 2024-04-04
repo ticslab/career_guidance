@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import bridge from '@vkontakte/vk-bridge';
 import { View, AdaptivityProvider, AppRoot, ConfigProvider, SplitLayout, Div,Avatar,InfoRow,  SplitCol } from '@vkontakte/vkui';
 import '@vkontakte/vkui/dist/vkui.css';
@@ -8,7 +8,6 @@ import Home from './panels/Home';
 import Page from './panels/Page';
 import Info from './panels/Info';
 import IntersectionPage from './panels/IntersectionPage';
-
 
 
 const App = () => {
@@ -24,17 +23,47 @@ const App = () => {
 	const [chartData, setChartData] = useState([]);
 	const [labels, setLabels] = useState([]);
 	const [names, setNames] = useState([]);
+	const [progress, setProgress] = useState(0);
 
+
+	function reset_params(){
+		setGroups([]);
+		setMax(null);
+	}
+
+	function reset_intersection(){
+		setLabels([]);
+		setNames([]);
+		setIntObject([]);
+		setChartData([]);
+	}
 
 	async function handleChange(value){
+		if (value.length != 4){
+			var res = await getIntersection(value);
+			var s = await prepare(res);
+			setIntObject(s);
+		}
+	};
+
+
+	async function chosenonChange(value){
 		if (!loading){
 			setLoading(true);
 		};
-		var res = await getIntersection(value);
-		var s = await prepare(res);
-		setIntObject(s);
-	};
+		if (value.length >= 4){
+			if (value.length == 4 && intObject.length === 0){
+				
+				var res = await getIntersection(value, true);
+				var s = await prepare(res);
+				setIntObject(s);
+			}
+			else{
+				await getIntersection(value, true);
+			}
+		}
 
+	}
 
 	async function sendAct(flag, g){
 		try {
@@ -42,7 +71,7 @@ const App = () => {
 				if (!loading){
 					setLoading(true);
 				};
-				var res = await axios.post('http://127.0.0.1:5000/act', g, {'Content-Type': 'application/json', 'charset': 'utf-8'})
+				var res = await axios.post('http://127.0.0.1:5000/act', g, {'Content-Type': 'application/json', 'charset': 'utf-8'});
 				setType(res.data);
 				setLoading(false);
 			}
@@ -62,7 +91,7 @@ const App = () => {
 		return data.response.items;
 	}
 
-	async function fetchGroups (id,flag, sex) {
+	async function fetchGroups (id, flag, sex) {
 			var data = '';
 			var token = await bridge.send('VKWebAppGetAuthToken', { 
 				app_id: 51591939, 
@@ -103,13 +132,11 @@ const App = () => {
 
 	const intersectionOfTwoObjects = (firstObject, secondObject) => {
 		const newObj = {};
-		
 		for (const key in firstObject) { 
 			if (key in secondObject) {
 				newObj[key] = Math.min(firstObject[key], secondObject[key]);
 			}
 		}          
-		
 		return newObj;
 	};
 
@@ -189,10 +216,9 @@ const App = () => {
 						}
 					}
 				}
-				// line.push(sum_of_others);
 				data.push(line);
 			};
-			// randoms.push('Остальное');
+			setLoading(false);
 			setChartData(data);
 			setLabels(randoms);
 		}
@@ -203,7 +229,7 @@ const App = () => {
 		
 	}
 
-	async function getIntersection(user_list){
+	async function getIntersection(user_list, for_picture = false){
 		try{
 			if (user_list.includes(null) || user_list[0] != fetchedUser.id){
 				user_list[0] = fetchedUser.id;
@@ -226,13 +252,16 @@ const App = () => {
 		for (let i=0;i<u_list.length;++i){
 			var g = await fetchGroups(u_list[i], 0);
 			
-				
 			all_g[u_list[i]] = g;
 			if (u_list.length>7){
+				setProgress((i+1) / u_list.length * 100);
 				await sleep(500);
-				console.log(1);
-			};
+			}
+			else{
+				setProgress(100);
+						};
 			var intersection = intersectionOfTwoObjects(my_act, g)
+
 			var keys = Object.keys(intersection);
 			if (i==0){
 				all_activities_in_intersection = keys;
@@ -247,8 +276,16 @@ const App = () => {
 			result.push(Object.entries(intersection));
 		}
 		result.push(data[0][1]);
-		intersectForPicture(my_act, result, all_g, all_activities_in_intersection);
-		return result;
+		if (for_picture){
+			intersectForPicture(my_act, result, all_g, all_activities_in_intersection);
+			return result;
+		}
+		else{
+			setLoading(false);
+			setChartData([]);
+			setLabels([]);
+			return result;
+		}
 	};
 
 	function create_max_data (max_d){
@@ -360,10 +397,10 @@ const App = () => {
 					<SplitLayout>
 						<SplitCol>
 							<View activePanel={activePanel}>
-								<Home id='home' fetch_foreign={fetchForeignPage} fetch_my={fetchMyPage} get={getUserId} go={go} flag={boolText} fetch_int={fetchIntersection} onChange={handleChange} user={fetchedUser} />
-								<Page id='page' groups={groups} go={go} fetchedUser={fetchedUser} max_data={maxData} type={predictedType} loading={loading} fId={Boolean(fetchedId)}/>
+								<Home id='home' fetch_foreign={fetchForeignPage} fetch_my={fetchMyPage} get={getUserId} go={go} flag={boolText} fetchInt={fetchIntersection} onChange={handleChange} user={fetchedUser} chosenonChange={chosenonChange} progress={progress}/>
+								<Page id='page' groups={groups} go={go} fetchedUser={fetchedUser} max_data={maxData} type={predictedType} loading={loading} fId={Boolean(fetchedId)} reset={reset_params}/>
 								<Info id='info' go={go}/>
-								<IntersectionPage id='intpage' go={go} intObject={intObject} loading={loading} chartData={chartData} labels={labels} names={names}/>
+								<IntersectionPage id='intpage' go={go} intObject={intObject} loading={loading} chartData={chartData} labels={labels} names={names} reset={reset_intersection}/>
 							</View>
 						</SplitCol>
 					</SplitLayout>
