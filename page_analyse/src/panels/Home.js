@@ -7,7 +7,6 @@ import { PanelHeader, Panel, Spacing, Button, Div, Checkbox,
 
 import icon from '../img/icon.png';
 import './Icon.css';
-import './Home.css';
 
 const Home = ({ id, fetch_foreign, fetch_my, 
 	get, go, flag, fetchInt, onChange, user, chosenonChange, progress }) => {
