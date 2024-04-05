@@ -24,7 +24,7 @@ ChartJS.register(
   Legend
 );
 
-
+const availableScreenWidth = document.documentElement.scrollWidth - document.documentElement.scrollWidth * 0.1
 export const LineChart = ({chartData, chartLabels, names}) => {
     const labels = chartLabels;
     const data = {
@@ -61,7 +61,9 @@ export const LineChart = ({chartData, chartLabels, names}) => {
         ],
         };
 
-    return (<Line data={data}/>);
+    return (<div style={{width: availableScreenWidth}}>
+      <Line data={data}/>
+          </div>);
 }
 
 export default LineChart;

@@ -1,47 +1,90 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { PanelHeader, Panel, Button, Div, Checkbox, FormItem, Input, FormLayoutGroup,ModalPage, PanelHeaderSubmit, ModalPageHeader,SplitLayout, Avatar, Search, ModalRoot  } from '@vkontakte/vkui';
+import { PanelHeader, Panel, Spacing, Button, Div, Checkbox, 
+	Progress, FormItem, Input, FormLayoutGroup,ModalPage, PanelHeaderSubmit, 
+	ModalPageHeader,SplitLayout, Avatar, Search, ModalRoot, Group  } from '@vkontakte/vkui';
 
 import icon from '../img/icon.png';
 import './Icon.css';
+import './Home.css';
 
-const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange, user }) => {
+const Home = ({ id, fetch_foreign, fetch_my, 
+	get, go, flag, fetchInt, onChange, user, chosenonChange, progress }) => {
 	const [activeModal, setActiveModal] = React.useState(null);
 	const [friends, setFriends] = React.useState(null);
 	const [search, setSearch] = React.useState('');
 	const [selectedCheckboxes, setSelectedCheckboxes] = React.useState([user ? user.id : null]);
+	const [chosenCheckboxes, setChosenCheckboxes] = React.useState([user ? user.id : null]);
 
-	async function getFrineds(){
-		var friends = await fetch_int();
-		setFriends(friends);
-	};
+
+	const availableScreenWidth = document.documentElement.scrollWidth
+	const availableScreenHeight = window.screen.availHeight
+
+
+	React.useEffect(() => {
+    fetchInt().then(setFriends);
+  }, []);
 
 	const handleChange = (event) => {
-		onChange(event)
+		onChange(event);
 	};
+
+	const handleChosenChange = (event) => {
+		chosenonChange(event);
+	}
 
 	const handleCheckboxChange = (event) => {
-		var name = event.target.id;
-		var checked = event.target.checked; 
-		var updatedSelectedCheckboxes = [...selectedCheckboxes];
-		
+		const name = event.target.id;
+		const checked = event.target.checked;
+		const updatedCheckboxes = [...selectedCheckboxes];
+	  
 		if (checked) {
-			updatedSelectedCheckboxes.push(name);
+		  updatedCheckboxes.push(name);
 		} else {
-			updatedSelectedCheckboxes = updatedSelectedCheckboxes.filter(
-			(checkboxName) => checkboxName !== name
-			);
+		  updatedCheckboxes.splice(updatedCheckboxes.indexOf(name), 1);
 		}
-		setSelectedCheckboxes(updatedSelectedCheckboxes);
-		console.log(selectedCheckboxes);
+	  
+		setSelectedCheckboxes(updatedCheckboxes);
+	  };
 
-	};
+	const handleChosenCheckboxChange = (event) => {
+		const name = event.target.id;
+		const checked = event.target.checked;
+		const updatedCheckboxes = [...chosenCheckboxes];
+	  
+		if (checked) {
+		  if (updatedCheckboxes.length < 4) {
+			updatedCheckboxes.push(name);
+		  } else {
+			event.target.checked = false;
+			return;
+		  }
+		} else {
+		  updatedCheckboxes.splice(updatedCheckboxes.indexOf(name), 1);
+		}
+	  
+		if (updatedCheckboxes.length === 3) {
+		  const allCheckboxes = document.getElementsByName('friend');
+		  for (let i = 0; i < allCheckboxes.length; i++) {
+			if (!updatedCheckboxes.includes(allCheckboxes[i].id)) {
+			  allCheckboxes[i].disabled = true;
+			}
+		  }
+		} else {
+		  const allCheckboxes = document.getElementsByName('friend');
+		  for (let i = 0; i < allCheckboxes.length; i++) {
+			allCheckboxes[i].disabled = false;
+		  }
+		}
+	  
+		setChosenCheckboxes(updatedCheckboxes);
+	  };
 
 	const friendsFiltered = () => {
-		
-		try{ //friend.toLowerCase().indexOf(search.toLowerCase()) > -1
-			var s = friends.filter( friend  => friend[1].toLowerCase().indexOf(search.toLowerCase()) > -1)
+		try{ 
+			var s = friends.filter( friend  => 
+				friend[1].toLowerCase().indexOf(search.toLowerCase()) > -1)
 			return s;
 		}
 		catch (err){
@@ -49,24 +92,44 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 		}
 	} 
 
+	const friends_to_choose = () => {
+		try{
+			var result = [];
+			for (var i = 0;i<friends.length; i++){
+				if (selectedCheckboxes.includes(friends[i][0].toString())){
+					result.push([friends[i][0], friends[i][1], friends[i][2]]);
+				}
+			}
+			return result;
+		}
+		catch (err){
+			return [];
+		}
+	}
+
 	const SearchonChange = (e) => {
 		setSearch(e.target.value);
 	  };
 
 	const modal = (
-		<ModalRoot activeModal={activeModal} onClose={() => setActiveModal(null)}>
+		<ModalRoot activeModal={activeModal} onClose={() => {setActiveModal(null); 
+		setSelectedCheckboxes([null]); setChosenCheckboxes([null]);}}>
 				<ModalPage id="modal">
 					<ModalPageHeader 
-					after={<PanelHeaderSubmit onClick={() => {handleChange(selectedCheckboxes);if(selectedCheckboxes.length>1){go('intpage');}} } data-to={'intpage'} />}
+					after={<PanelHeaderSubmit onClick={() => {handleChange(selectedCheckboxes);
+						if(selectedCheckboxes.length>4)
+						{setActiveModal('choose_friends')}
+						else if (selectedCheckboxes.length>1)
+						{handleChosenChange(selectedCheckboxes);go('intpage');}} }
+						 data-to={'intpage'} />}
 					>
 						Друзья
 					</ModalPageHeader>
 					<Search value={search} onChange={SearchonChange} after={null}/>
 						{friendsFiltered().length > 0 && 
-          				friendsFiltered().map((friend) => 
-						// onClick={() => {userList.push(friend[0])}} 
+          				friendsFiltered().map((friend) =>  
 								<Checkbox id={friend[0]} 
-								onClick={handleCheckboxChange} 
+								onClick={(event) => handleCheckboxChange(event)}
 								checked={selectedCheckboxes.includes(friend[0].toString())}
 								>
 									<Div style={{position: 'relative', 
@@ -83,15 +146,63 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 						
 						)}
 				</ModalPage>
+				<ModalPage id='choose_friends'>
+					<ModalPageHeader 
+					after={<PanelHeaderSubmit onClick={() => {handleChosenChange(chosenCheckboxes)
+						;if (chosenCheckboxes?.length == 4){go('intpage')}}} data-to={'intpage'}/>}
+					>
+						Выберите друзей
+					</ModalPageHeader>
+					{progress != 100 && 
+					<Group>
+						<Div>Идёт загрузка. Пожалуйста, подождите... {progress.toFixed(2)}%</Div>
+						<Progress appearance="positive" aria-labelledby="progresslabelPositive" 
+						value={progress} />
+						<Spacing size={16} />
+					</Group>
+
+						}
+					{progress == 100 && 
+						<Group>
+							<Div>
+							Выберите 3 друзей, для которых хотите посмотреть график с вашими общими тематиками
+							</Div>
+							{
+								friends_to_choose().map((friend) =>
+								<Checkbox id={friend[0].toString()} 
+								onClick={(event) => handleChosenCheckboxChange(event)}
+								checked={chosenCheckboxes.includes(friend[0].toString())}
+								>
+									<Div style={{position: 'relative', 
+												display: 'flex', 
+												alignItems: 'center',
+												padding: '0px 0px'}}
+												id={friend[0]} 
+												>
+												<Avatar src={friend[2]} style={{margin:'10px'}} />
+												{friend[1]}
+									</Div>
+								
+								</Checkbox>	)
+							}
+						</Group>
+						
+					}
+					
+
+				</ModalPage>
 				<ModalPage id='hint'>
 					<ModalPageHeader 
 					after={<PanelHeaderSubmit onClick={() => setActiveModal('modal')}/>}
+
 					>
 						Инструкция
 					</ModalPageHeader>
 					<Div>
-						Вам будет предложено выбрать друзей из приведенного списка.<br/><br/>Для удобства можно воспользоваться строкой для поиска.<br/><br/>
-						После нажатия на кнопку в правом верхнем углу, приложение рассчитает пересечение Ваших тематик с тематиками выбранных друзей.
+						Вам будет предложено выбрать друзей из приведенного списка.<br/>
+						<br/>Для удобства можно воспользоваться строкой для поиска.<br/><br/>
+						После нажатия на кнопку в правом верхнем углу, приложение рассчитает 
+						пересечение Ваших тематик с тематиками выбранных друзей.
 					</Div>
 				</ModalPage>
 		</ModalRoot>
@@ -110,7 +221,8 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 						right: 0}
 					} 
 						onClick={go} 
-						data-to={'info'}>
+						data-to={'info'}
+						>
 						Меню
 					</Button>
 				</Div>
@@ -128,20 +240,20 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 					top: '50px', 
 					display: 'flex', 
 					alignItems: 'center'}}>
-					<Button style={
-						{backgroundColor: '#2688EB', 
-						height: '35px',
-						margin: '0 5px'}
-					} 
+					<Button className='my_page'
+						style={{'backgroundColor': '#2688EB',
+						height: availableScreenHeight > 800 ? availableScreenHeight * 0.03 : availableScreenHeight * 0.05,
+								width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.4}}
 						onClick={ fetch_my } 
-						data-to={"page"} 
-						size='m' >
+						data-to={"page"} >
 						Анализ моей старницы
 					</Button>
 					
 					<Button style={
-						{backgroundColor: '#2688EB', //onClick
-						height: '35px'}} size='m' onClick={() => {getFrineds();setActiveModal('hint');}}>
+						{backgroundColor: '#2688EB', 
+						height: availableScreenHeight > 800 ? availableScreenHeight * 0.03 : availableScreenHeight * 0.05,
+						width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.4}} onClick={() => 
+						{setActiveModal('hint');}}>
 						Анализ общих тематик
 					</Button>
 					
@@ -158,15 +270,14 @@ const Home = ({ id, fetch_foreign, fetch_my, get, go, flag, fetch_int, onChange,
 							status={flag ? '' : 'error'}
 							bottom={flag ? "" : 'Введите корректный id'}
 							>
-							<Input onChange={get} style={{width: '300px'}} placeholder='Ввести id:'/>
+							<Input onChange={get} style={{marginRight: 5,width: availableScreenWidth * 0.5, height: availableScreenHeight * 0.05}} 
+							placeholder='Ввести id:'/>
 						</FormItem>
 						<Button style={
-							{marginLeft: 15, 
-							backgroundColor: '#2688EB'}
+							{backgroundColor: '#2688EB', height: availableScreenHeight * 0.05}
 						} 
 						onClick={ fetch_foreign } 
-						data-to="page" 
-						size='l'>
+						data-to="page" >
 							<img className="Icon" src={icon}/>
 						</Button>
 					</FormLayoutGroup >

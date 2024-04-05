@@ -19,7 +19,7 @@ const Info = props => (
             лаборатория теоретических и междисциплинарных проблем информатики
             </Div>
             <SimpleCell before={<Icon28GlobeOutline />}>
-                <Link href='https://dscs.pro/'>Сайт лаборатории ТиМПИ</Link>
+                <Link href="https://dscs.pro/" target="_blank">Сайт лаборатории ТиМПИ</Link>
             </SimpleCell>
             <SimpleCell indicator="st087200@student.spbu.ru" before={<Icon28MailOutline />}>
             Email

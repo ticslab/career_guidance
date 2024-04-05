@@ -3,19 +3,25 @@ import PropTypes from 'prop-types';
 import LineChart  from './LineChart';
 
 
-import { PanelHeader, Panel, PanelHeaderBack, Div, Group, Button, Spinner } from '@vkontakte/vkui';
+import { PanelHeader, Panel, PanelHeaderBack, Cell, Div, Group, Button, Spinner } from '@vkontakte/vkui';
 
 function viewAct(){
 	document.getElementById("group").style.display = "block";
 	document.getElementById("button").style.display = "none";
   };
 
+
 const IntersectionPage = (props) => {
+
+    function reset(){
+        props.reset();
+        props.go('home');
+    }
 
     return(
         <Panel id = {props.id}>
             <PanelHeader
-                before={<PanelHeaderBack onClick={props.go} data-to="home"/>}
+                before={<PanelHeaderBack onClick={reset} data-to="home"/>}
             >
                 Тематики друзей
             </PanelHeader>
@@ -23,9 +29,9 @@ const IntersectionPage = (props) => {
                     {!props.loading && 
                     <Group>
                         {props.chartData.length >= 3 &&
-                            <Div style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
+                            <Cell style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
                                 <LineChart chartData={props.chartData} chartLabels={props.labels} names={props.names}/>
-                            </Div>
+                            </Cell>
                         }
                         
                         <Div style={{flexDirection: 'column', display: props.chartData.length >=3 ? 'flex' : 'none', alignItems: 'center'}}>
@@ -52,7 +58,8 @@ const IntersectionPage = (props) => {
 IntersectionPage.propTypes = {
     id: PropTypes.string.isRequired,
     prep: PropTypes.func,
-    intObject: PropTypes.array
+    intObject: PropTypes.array,
+    reset: PropTypes.func
 }
 
 export default IntersectionPage;
