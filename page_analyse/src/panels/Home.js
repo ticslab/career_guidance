@@ -21,9 +21,15 @@ const Home = ({ id, fetch_foreign, fetch_my,
 	const availableScreenHeight = window.screen.availHeight
 
 
-	React.useEffect(() => {
-    fetchInt().then(setFriends);
-  }, []);
+	const getFriends = () => {
+		getFrineds();
+	}
+
+	async function getFrineds(){
+		var friends = await fetchInt();
+		setFriends(friends);
+		setActiveModal('hint');
+	};
 
 	const handleChange = (event) => {
 		onChange(event);
@@ -31,6 +37,10 @@ const Home = ({ id, fetch_foreign, fetch_my,
 
 	const handleChosenChange = (event) => {
 		chosenonChange(event);
+	}
+
+	const fetchMy = (event) => {
+		fetch_my(event);
 	}
 
 	const handleCheckboxChange = (event) => {
@@ -80,7 +90,7 @@ const Home = ({ id, fetch_foreign, fetch_my,
 		setChosenCheckboxes(updatedCheckboxes);
 	  };
 
-	const friendsFiltered = () => {
+	const friendsFiltered = React.useMemo(() => {
 		try{ 
 			var s = friends.filter( friend  => 
 				friend[1].toLowerCase().indexOf(search.toLowerCase()) > -1)
@@ -89,31 +99,20 @@ const Home = ({ id, fetch_foreign, fetch_my,
 		catch (err){
 			return []
 		}
-	} 
-
-	const friends_to_choose = () => {
-		try{
-			var result = [];
-			for (var i = 0;i<friends.length; i++){
-				if (selectedCheckboxes.includes(friends[i][0].toString())){
-					result.push([friends[i][0], friends[i][1], friends[i][2]]);
-				}
-			}
-			return result;
-		}
-		catch (err){
-			return [];
-		}
-	}
+	}, [friends, search]); 
 
 	const SearchonChange = (e) => {
 		setSearch(e.target.value);
 	  };
 
+	const friendsToChoose = React.useMemo(() => {
+		return friends?.filter(friend => selectedCheckboxes.includes(friend[0].toString())) || [];
+	}, [friends, selectedCheckboxes]);
+
 	const modal = (
 		<ModalRoot activeModal={activeModal} onClose={() => {setActiveModal(null); 
 		setSelectedCheckboxes([null]); setChosenCheckboxes([null]);}}>
-				<ModalPage id="modal">
+				<ModalPage id="modal" settlingHeight={100}>
 					<ModalPageHeader 
 					after={<PanelHeaderSubmit onClick={() => {handleChange(selectedCheckboxes);
 						if(selectedCheckboxes.length>4)
@@ -125,8 +124,8 @@ const Home = ({ id, fetch_foreign, fetch_my,
 						Друзья
 					</ModalPageHeader>
 					<Search value={search} onChange={SearchonChange} after={null}/>
-						{friendsFiltered().length > 0 && 
-          				friendsFiltered().map((friend) =>  
+						{friendsFiltered.length > 0 && 
+          				friendsFiltered.map((friend) =>  
 								<Checkbox id={friend[0]} 
 								onClick={(event) => handleCheckboxChange(event)}
 								checked={selectedCheckboxes.includes(friend[0].toString())}
@@ -145,7 +144,7 @@ const Home = ({ id, fetch_foreign, fetch_my,
 						
 						)}
 				</ModalPage>
-				<ModalPage id='choose_friends'>
+				<ModalPage id='choose_friends' settlingHeight={100}>
 					<ModalPageHeader 
 					after={<PanelHeaderSubmit onClick={() => {handleChosenChange(chosenCheckboxes)
 						;if (chosenCheckboxes?.length == 4){go('intpage')}}} data-to={'intpage'}/>}
@@ -167,7 +166,7 @@ const Home = ({ id, fetch_foreign, fetch_my,
 							Выберите 3 друзей, для которых хотите посмотреть график с вашими общими тематиками
 							</Div>
 							{
-								friends_to_choose().map((friend) =>
+								friendsToChoose.map((friend) =>
 								<Checkbox id={friend[0].toString()} 
 								onClick={(event) => handleChosenCheckboxChange(event)}
 								checked={chosenCheckboxes.includes(friend[0].toString())}
@@ -198,10 +197,14 @@ const Home = ({ id, fetch_foreign, fetch_my,
 						Инструкция
 					</ModalPageHeader>
 					<Div>
-						Вам будет предложено выбрать друзей из приведенного списка.<br/>
-						<br/>Для удобства можно воспользоваться строкой для поиска.<br/><br/>
+						Вам будет предложено выбрать друзей из приведенного списка. Для удобства можно воспользоваться <b>строкой для поиска.</b><br/>
+						<br/>
 						После нажатия на кнопку в правом верхнем углу, приложение рассчитает 
-						пересечение Ваших тематик с тематиками выбранных друзей.
+						пересечение Ваших тематик с тематиками выбранных друзей.<br/><br/>
+						При выборе трех и более друзей будет изображен график, на котором отражено количество Ваших общих с выбранными пользователями тематик. 
+						<br/><br/>Помимо этого, нажав на кнопку <b>«Показать список всех друзей»</b>, на странице появится пересечение тематик.
+						<br/><br/><b>Пример расчета пересечения:</b><br/>
+						У вас 12 групп с тематикой «Юмор», а у Вашего друга таких групп 7. Тогда пересечение по тематике «Юмор» равняется 7.
 					</Div>
 				</ModalPage>
 		</ModalRoot>
@@ -230,36 +233,40 @@ const Home = ({ id, fetch_foreign, fetch_my,
 					alignItems: 'center', 
 					flexDirection: 'column' }}>
 				<Div style={
-					{position: 'relative', 
-					top: '50px', 
+					{position: 'absolute', 
+					top: availableScreenWidth * 0.25, 
+					paddingTop: 0,
 					display: 'flex', 
 					alignItems: 'center', 
 					flexDirection: 'column' }}>
 					<Div style={{position: 'relative', 
-					top: '50px', 
 					display: 'flex', 
+					paddingBottom: 0,
+					flexDirection: availableScreenWidth > 600 ? 'row' : 'column', 
 					alignItems: 'center'}}>
 					<Button className='my_page'
 						style={{'backgroundColor': '#2688EB',
 						height: availableScreenHeight > 800 ? availableScreenHeight * 0.03 : availableScreenHeight * 0.05,
-								width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.4}}
-						onClick={ fetch_my } 
+								width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.6,
+							marginRight: availableScreenWidth > 600 ? 5 : 0,
+							marginBottom: availableScreenWidth > 600 ? 0 : 5}}
+						onClick={ fetchMy } 
 						data-to={"page"} >
 						Анализ моей старницы
 					</Button>
 					
-					<Button style={
-						{backgroundColor: '#2688EB', 
+					<Button style={{
+						backgroundColor: '#2688EB', 
 						height: availableScreenHeight > 800 ? availableScreenHeight * 0.03 : availableScreenHeight * 0.05,
-						width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.4}} onClick={() => 
-						{setActiveModal('hint');}}>
+						width: availableScreenWidth > 600 ? availableScreenWidth * 0.31 : availableScreenWidth * 0.6
+						}} onClick={ getFriends }>
 						Анализ общих тематик
 					</Button>
 					
 					</Div>
 					<Div style={
 					{position: 'relative', 
-					top: '20px', 
+					paddingTop: 0, 
 					display: 'flex', 
 					alignItems: 'center', 
 					flexDirection: 'column' }}>
@@ -267,10 +274,10 @@ const Home = ({ id, fetch_foreign, fetch_my,
 						<FormItem 
 							top='Узнать про чужую страницу:'  
 							status={flag ? '' : 'error'}
-							bottom={flag ? "" : 'Введите корректный id'}
+							bottom={flag ? "" : 'Введите корректный id, например: 228725426'}
 							>
 							<Input onChange={get} style={{marginRight: 5,width: availableScreenWidth * 0.5, height: availableScreenHeight * 0.05}} 
-							placeholder='Ввести id:'/>
+							placeholder='Введите id'/>
 						</FormItem>
 						<Button style={
 							{backgroundColor: '#2688EB', height: availableScreenHeight * 0.05}

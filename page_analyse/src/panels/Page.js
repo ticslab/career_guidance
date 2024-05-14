@@ -92,11 +92,11 @@ const Page = (props) => {
 				aria-describedby="tooltip-1"
 				content={
 					<Div>
-						<Text style={{fontSize: '15px', textAlign: 'center'}}>Это не точный тип.<br/> Для уточнения нажмите<br/> на кнопку<br/> «Уточнить результаты»</Text>
+        					<Text style={{fontSize: '15px', textAlign: 'center'}}>Тип может не соответствовать<br/>действительности.<br/>Для уточнения нажмите<br/> на кнопку<br/> «Уточнить результаты»</Text>
 					</Div>
 				}
 				>
-				<Icon20InfoCircleOutline id={'tooltip-1'}></Icon20InfoCircleOutline>
+				<Icon20InfoCircleOutline id={'tooltip-1'} style={{color: '#2688EB'}}></Icon20InfoCircleOutline>
 			</Popover>
 			
 			</div>
@@ -112,7 +112,7 @@ const Page = (props) => {
 		<Cell style={{flexDirection: 'column', display: 'flex', alignItems: 'center'}}>
 			{props.max_data ? <BarChart chartData={props.max_data}/> : ''}
 		</Cell>}
-		{!props.loading && <Button id='button' style={{backgroundColor: 'rgba(0,0,0,0)', color: '#818C99', marginTop: '10px', fontSize: 16}} onClick={viewAct}>
+		{!props.loading && <Button id='button' style={{backgroundColor: 'rgba(0,0,0,0)', color: '#2688EB', marginTop: '10px', fontSize: 16}} onClick={viewAct}>
 			Показать все тематики
 		</Button>
 		}

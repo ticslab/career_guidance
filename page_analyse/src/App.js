@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import bridge from '@vkontakte/vk-bridge';
 import { View, AdaptivityProvider, AppRoot, ConfigProvider, SplitLayout, Div,Avatar,InfoRow,  SplitCol } from '@vkontakte/vkui';
 import '@vkontakte/vkui/dist/vkui.css';
-import axios from 'axios';
+import axios, { all } from 'axios';
 
 import Home from './panels/Home';
 import Page from './panels/Page';
@@ -23,7 +23,7 @@ const App = () => {
 	const [chartData, setChartData] = useState([]);
 	const [labels, setLabels] = useState([]);
 	const [names, setNames] = useState([]);
-	const [progress, setProgress] = useState(0);
+	const [progress, setProgress] = useState(100);
 
 
 	function reset_params(){
@@ -84,29 +84,25 @@ const App = () => {
 	async function fetchFriends(id){
 		var token = await bridge.send('VKWebAppGetAuthToken', { 
 			app_id: 51591939, 
-			scope: 'friends'
+			scope: 'groups,friends'
 			});
 		var data = '';
 		data = await bridge.send("VKWebAppCallAPIMethod", {"method": "friends.get", "request_id": "getFriends",  "params": {"user_id": id, "v":"5.131","fields": "photo_100", "access_token": token.access_token}});
 		return data.response.items;
 	}
 
-	async function fetchGroups (id, flag, sex) {
+	async function fetchGroups (id, token, flag, sex) {
 			var data = '';
-			var token = await bridge.send('VKWebAppGetAuthToken', { 
-				app_id: 51591939, 
-				scope: 'groups'
-				});
-			data = await bridge.send("VKWebAppCallAPIMethod", {"method": "groups.get", "request_id": "getGroups", "params": {"user_id": id, "v":"5.131", "fields":"activity", "extended":"1", "access_token": token.access_token}});
 			try{
+                data = await bridge.send("VKWebAppCallAPIMethod", {"method": "groups.get", "request_id": "getGroups", "params": {"user_id": id, "v":"5.199", "fields":"activity", "extended":"1", "access_token": token}});
 				var activity_array = data.response.items.map(item => item.activity);
 				var res = activity_array.reduce(function(acc, el) 
 					{
 						if (el && !(el.match(/заблокирован/)))
 						{
-							if (el.match(/\d\d:\d\d/))
+							if (el.match(/\d:\d\d/))
 							{
-								el = 'Meeting';
+								el = 'Встреча';
 							}
 							acc[el] = (acc[el] || 0) + 1;
 						}
@@ -125,8 +121,9 @@ const App = () => {
 						return res;
 					};
 			}
-			catch{
-				setGroups([["Error", error.error_data.error_msg]]);
+			catch (e){
+                console.log(e.error_data.error_msg);
+				setGroups([["Error", e.error_data.error_msg]]);
 			};
 	};
 
@@ -167,67 +164,65 @@ const App = () => {
 	};
 
 	function getRandomInt(max) {
-		return Math.floor(Math.random() * max);
-	  }
+		return Math.floor(Math.random() * Math.floor(max));
+	}
 
-	function intersectForPicture(my, result, all_g, all_act){
-		var data = [];
-		var randoms = [];
-		var rnd = 0;
-		try{
-			for (let j=0;j<4;j++){
-				rnd = getRandomInt(4);
+	function intersectForPicture(my, result, all_g, all_act) {
+		let data = [];
+		let randoms = [];
+		let rnd = 0;
+		try {
+			for (let j = 0; j < 4; j++) {
+				rnd = getRandomInt(all_act.length);
 				randoms.push(all_act[rnd]);
 				all_act.splice(rnd, 1);
-			};
-			var keys = Object.keys(all_g);
-			var names = [];
-			for (var key in keys){
-				for (let t=0; t < result[result.length-1].length;t++){
-					if (keys[key] == result[result.length-1][t].id.toString()){
-						names.push(result[result.length-1][t].first_name + ' ' + result[result.length-1][t].last_name)
-					};
-				};
-			};
-			setNames(names);
-			for (let i=0;i<randoms.length;i++){
-				var line = [];
-				for (let j=0;j< randoms.length; j++){
-					if (i == 0){
-						line.push(my[randoms[j]]);
-					}
-					else{
-						line.push(all_g[keys[i-1]][randoms[j]] ? all_g[keys[i-1]][randoms[j]] : 0);
-	
+			}
+			let keys = Object.keys(all_g);
+			let names = [];
+			for (let key of keys) { 
+				for (let t = 0; t < result[result.length - 1].length; t++) {
+					if (key === result[result.length - 1][t].id.toString()) {
+						names.push(`${result[result.length - 1][t].first_name} ${result[result.length - 1][t].last_name}`);
 					}
 				}
-				var sum_of_others = 0;
-				if (i == 0){
-					for (let key in my){
-						if (!randoms.includes(key)){
-							sum_of_others += my[key]
+			}
+			setNames(names);
+			for (let i = 0; i < randoms.length; i++) {
+				let line = [];
+				for (let j = 0; j < randoms.length; j++) {
+					if (i === 0) {
+						line.push(my[randoms[j]] || 0); 
+					} else {
+						line.push(all_g[keys[i - 1]][randoms[j]] || 0);
+					}
+				}
+				let sum_of_others = 0;
+				if (i === 0) {
+					for (let key in my) {
+						if (!randoms.includes(key)) {
+							sum_of_others += my[key];
 						}
 					}
-				}
-				else{
-					for (let key in all_g[keys[i-1]]){
-						if (!randoms.includes(key)){
-							sum_of_others += all_g[keys[i-1]][key]
+				} else {
+					for (let key in all_g[keys[i - 1]]) {
+						if (!randoms.includes(key)) {
+							sum_of_others += all_g[keys[i - 1]][key];
 						}
 					}
 				}
 				data.push(line);
 			};
+
 			setLoading(false);
 			setChartData(data);
 			setLabels(randoms);
-		}
-		catch{
+		} catch (error) { 
+			console.error(error);
 			setChartData([]);
 			setLabels([]);
 		}
-		
 	}
+
 
 	async function getIntersection(user_list, for_picture = false){
 		try{
@@ -238,22 +233,23 @@ const App = () => {
 		catch{
 
 		}
+                setProgress(0)
 		var result = [];			
 		var token = await bridge.send('VKWebAppGetAuthToken', { 
 			app_id: 51591939, 
-			scope: 'friends'
+			scope: 'groups,friends'
 			});
 		var all_g = Object();
-		var my_act = await fetchGroups(user_list[0], 0);
+		var my_act = await fetchGroups(user_list[0], token.access_token, 0);
 		var u_list = transformArray(user_list);
 		let sleep = ms => new Promise(res=>setTimeout(res,ms));
 		var data = Object.entries(await bridge.send("VKWebAppCallAPIMethod", {"method": "users.get", "request_id": "getUsers", "params": {"user_ids": u_list.toString(), "v":"5.131","fields": "photo_100", "access_token": token.access_token}}));
 		var all_activities_in_intersection = []
 		for (let i=0;i<u_list.length;++i){
-			var g = await fetchGroups(u_list[i], 0);
+			var g = await fetchGroups(u_list[i], token.access_token, 0);
 			
 			all_g[u_list[i]] = g;
-			if (u_list.length>7){
+			if (u_list.length>3){
 				setProgress((i+1) / u_list.length * 100);
 				await sleep(500);
 			}
@@ -274,6 +270,20 @@ const App = () => {
 				}
 			}
 			result.push(Object.entries(intersection));
+		}
+		let all_activities = new Set();
+		for (let key in all_g){
+			Object.keys(all_g[key]).forEach(activity => all_activities.add(activity));
+		}
+		all_activities = [...all_activities];
+
+		while (all_activities_in_intersection.length < 4 && all_activities.length > 0) {
+			const randomIndex = Math.floor(Math.random() * all_activities.length);
+			const randomActivity = all_activities[randomIndex];
+			if (!all_activities_in_intersection.includes(randomActivity)) {
+				all_activities_in_intersection.push(randomActivity);
+			}
+			all_activities.splice(randomIndex, 1);
 		}
 		result.push(data[0][1]);
 		if (for_picture){
@@ -335,21 +345,39 @@ const App = () => {
 	};
 
 	async function fetchMyPage (e) {
-		go(e);
 		setId(0);
 		var user = await bridge.send("VKWebAppGetUserInfo");
 		setUser(user);
-		await fetchGroups(user.id,true, user.sex);
+		try{
+			var token = await bridge.send('VKWebAppGetAuthToken', { 
+				app_id: 51591939, 
+				scope: 'groups,friends'
+				});
+			fetchGroups(user.id, token.access_token, true, user.sex);
+			go('page');
+		}
+		catch (e){
+			console.log(e.error_data.error_msg);
+		}
 	};
 
 	async function fetchForeignPage (e) {
 		if (onlyNumber(fetchedId))
 		{
-			setLoading(false);
-			go(e);
-			var user = await bridge.send("VKWebAppGetUserInfo", {'user_id' : Number(fetchedId)});
+			try{
+				var token = await bridge.send('VKWebAppGetAuthToken', { 
+					app_id: 51591939, 
+					scope: 'groups,friends'
+					});
+			}
+			catch (e){
+				console.log(e);
+			}
+            var user = await bridge.send("VKWebAppGetUserInfo", {'user_id' : Number(fetchedId)});
 			setUser(user);
-			await fetchGroups(fetchedId,false, user.sex);
+			await fetchGroups(fetchedId, token.access_token, false, user.sex);
+			setLoading(false);
+			go('page');
 		}
 		else
 		{

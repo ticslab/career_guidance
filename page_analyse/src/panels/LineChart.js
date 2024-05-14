@@ -26,6 +26,31 @@ ChartJS.register(
 
 const availableScreenWidth = document.documentElement.scrollWidth - document.documentElement.scrollWidth * 0.1
 export const LineChart = ({chartData, chartLabels, names}) => {
+
+  const step = () => {
+    let maxElement = Number.NEGATIVE_INFINITY;
+
+    for (let i = 0; i < chartData.length; i++) {
+        for (let j = 0; j < chartData[i].length; j++) {
+            if (chartData[i][j] > maxElement) {
+                maxElement = chartData[i][j];
+            }
+        }
+    }
+    let step = maxElement >= 4  ? Math.ceil(maxElement / 4) : maxElement / 4
+    return step;
+}
+const options = {
+  scale: {
+    y: {
+      beginAtZero: true, 
+      ticks: {
+        stepSize: step 
+      }
+    }
+  }
+};
+ 
     const labels = chartLabels;
     const data = {
         labels,
@@ -62,7 +87,7 @@ export const LineChart = ({chartData, chartLabels, names}) => {
         };
 
     return (<div style={{width: availableScreenWidth}}>
-      <Line data={data}/>
+      <Line data={data} options={options}/>
           </div>);
 }
 
