@@ -14,7 +14,7 @@ cd ..
 ```
 ```
 cd server 
-pip install requirements.txt
+pip install -r requirements.txt
 cd ..
 ```
 ### Локальный запуск
